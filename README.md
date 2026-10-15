@@ -1,31 +1,51 @@
 # Routage dynamique de véhicules avec GNN et apprentissage par renforcement
 
-Projet de stage de 4e année d'Ousama Akhrif, consacré au routage dynamique de véhicules (DVRP) dans un environnement incertain, avec fenêtres temporelles et prise en compte du risque.
+Projet de stage consacré à la planification de tournées dans un environnement où les demandes évoluent pendant la journée. Les véhicules doivent servir des clients soumis à des fenêtres de temps, tandis que de nouvelles demandes, des annulations et l’incertitude des trajets modifient les décisions à prendre.
+
+L’objectif est d’apprendre une politique de décision capable de tenir compte à la fois de la structure du réseau, de l’état des véhicules et du risque associé aux déplacements.
 
 ## Approche
 
-Le notebook combine un encodeur de graphe `TransformerConv` tenant compte des arêtes, un encodeur de véhicule, un décodeur par attention et un biais explicite lié à l'incertitude du trajet. La politique est entraînée par REINFORCE avec un critique appris. Un ordonnanceur sélectionne les véhicules au fil des événements.
+Le projet repose sur un environnement de simulation paramétrable, un **encodeur de graphe TransformerConv** qui représente les clients et les trajets, puis un mécanisme d’attention qui choisit la prochaine action d’un véhicule. Un terme explicite de risque influe sur la décision. La politique est entraînée par **REINFORCE avec critique appris** et comparée à deux heuristiques : plus proche voisin et priorité tenant compte de l’urgence.
 
-## Résultats présentés dans le rapport de stage
+```text
+Demandes et trafic → état du réseau → GNN → choix du véhicule et du client
+                                          ↓
+                              récompense et entraînement RL
+```
 
-La comparaison sur 50 instances de test, avec politiques déterministes, rapporte :
+## Résultats
 
-| Méthode | Taux de service | Clients servis en moyenne | Distance totale | km par client servi |
-| --- | ---: | ---: | ---: | ---: |
-| Plus proche voisin | 0,376 | 56,4 | 218,8 km | 3,88 |
-| Heuristique tenant compte de l'urgence | 0,403 | 60,5 | 216,0 km | 3,57 |
-| GNN, meilleur point observé | 0,556 | 83,3 | 348,6 km | 4,18 |
+Les résultats suivants, issus du rapport de stage, comparent des politiques déterministes sur **50 instances de test** :
 
-Le rapport présente également un test d'intervention sur 200 décisions : le score de décision baisse dans le sens attendu lorsque l'incertitude de l'arête augmente. Dans un second test sur 25 instances, l'incertitude moyenne des arêtes choisies diminue de 14 % lorsque le coefficient de risque passe de 0 à 1. 
+| Politique | Taux de service | Clients servis en moyenne | Distance totale moyenne |
+| --- | ---: | ---: | ---: |
+| Plus proche voisin | 37,6 % | 56,4 | 218,8 km |
+| Urgence | 40,3 % | 60,5 | 216,0 km |
+| GNN, meilleur point observé | 55,6 % | 83,3 | 348,6 km |
 
-## Contenu
+La politique GNN sert davantage de clients dans cette comparaison, au prix d’une distance totale plus élevée. Ces chiffres proviennent du rapport de stage : les sorties détaillées de cette campagne ne sont pas incluses dans l’archive et n’ont pas été recalculées lors de sa préparation.
 
-- `DVRP_GNN_RL.ipynb` : environnement, modèle, entraînement et évaluation.
-- `dvrp_gnn_rl_final.pt` : poids du modèle final.
+## Contenu du projet
+
+- [`DVRP_GNN_RL.ipynb`](DVRP_GNN_RL.ipynb) : environnement, architecture GNN, entraînement, diagnostics et comparaison aux heuristiques.
+- `dvrp_gnn_rl_final.pt` : poids du modèle entraîné utilisés par la cellule d’évaluation finale.
 - `config/` : paramètres du scénario et distribution empirique des demandes.
+- `requirements.txt` : dépendances Python principales.
 
-## Utilisation
+## Exécution
 
-Installer les dépendances de `requirements.txt`, ouvrir le notebook depuis la racine du projet, puis suivre les cellules pertinentes. Les sections 1 à 11 définissent les composants. Les cellules d'entraînement des sections 12 et suivantes lancent un entraînement long et créent de nouveaux fichiers ; elles sont facultatives pour consulter l'architecture. La cellule d'évaluation finale pointe vers le modèle fourni à la racine du dossier.
+Créer un environnement Python, l’activer, installer les dépendances, puis ouvrir le notebook depuis la racine du projet :
 
-Le chargement d'un checkpoint PyTorch suppose que le fichier provient d'une source fiable. Les versions exactes des bibliothèques utilisées lors de l'entraînement ne sont pas documentées dans les fichiers d'origine.
+```bash
+python -m venv .venv
+# Windows PowerShell : .\.venv\Scripts\Activate.ps1
+# macOS/Linux : source .venv/bin/activate
+python -m pip install -r requirements.txt
+python -m pip install notebook
+jupyter notebook DVRP_GNN_RL.ipynb
+```
+
+Dans le notebook, les premières sections définissent l’environnement, le modèle et les fonctions nécessaires. La section d’entraînement lance un calcul long et peut être ignorée pour consulter l’architecture ou utiliser le checkpoint fourni. La section finale charge ce checkpoint et compare la politique aux heuristiques sur les graines de test définies dans le notebook.
+
+Le notebook n’est pas livré avec des sorties de cellules exécutées. Les versions exactes des bibliothèques employées pendant l’entraînement d’origine ne sont pas documentées dans les fichiers disponibles ; les résultats peuvent donc varier lors d’une nouvelle exécution.
