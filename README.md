@@ -16,7 +16,7 @@ La comparaison sur 50 instances de test, avec politiques déterministes, rapport
 | Heuristique tenant compte de l'urgence | 0,403 | 60,5 | 216,0 km | 3,57 |
 | GNN, meilleur point observé | 0,556 | 83,3 | 348,6 km | 4,18 |
 
-Le rapport présente également un test d'intervention sur 200 décisions : le score de décision baisse dans le sens attendu lorsque l'incertitude de l'arête augmente. Dans un second test sur 25 instances, l'incertitude moyenne des arêtes choisies diminue de 14 % lorsque le coefficient de risque passe de 0 à 1. Ces chiffres sont ceux du rapport et ne constituent pas une nouvelle vérification du modèle fourni ici.
+Le rapport présente également un test d'intervention sur 200 décisions : le score de décision baisse dans le sens attendu lorsque l'incertitude de l'arête augmente. Dans un second test sur 25 instances, l'incertitude moyenne des arêtes choisies diminue de 14 % lorsque le coefficient de risque passe de 0 à 1. 
 
 ## Contenu
 
